@@ -1,0 +1,191 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMnbeOsikdB8+8teuhk6YI/",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/223T1A3112/DL.lab/blob/main/multiply%20matrix%20%20report\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import numpy as np\n",
+        "from tensorflow.keras.models import Model\n",
+        "from tensorflow.keras.layers import Input, Dense, Flatten, Reshape, Concatenate\n",
+        "from tensorflow.keras.optimizers import Adam\n",
+        "\n",
+        "# Generate training data\n",
+        "def generate_data(num_samples, matrix_size):\n",
+        "    X1 = np.random.rand(num_samples, matrix_size, matrix_size)\n",
+        "    X2 = np.random.rand(num_samples, matrix_size, matrix_size)\n",
+        "    Y = np.matmul(X1, X2)\n",
+        "    return (X1, X2), Y\n",
+        "\n",
+        "# Define the model\n",
+        "def build_model(matrix_size):\n",
+        "    input1 = Input(shape=(matrix_size, matrix_size))\n",
+        "    input2 = Input(shape=(matrix_size, matrix_size))\n",
+        "\n",
+        "    flat1 = Flatten()(input1)\n",
+        "    flat2 = Flatten()(input2)\n",
+        "\n",
+        "    merged = Concatenate()([flat1, flat2])\n",
+        "\n",
+        "    dense1 = Dense(matrix_size * matrix_size, activation='relu')(merged)\n",
+        "    dense2 = Dense(matrix_size * matrix_size)(dense1)\n",
+        "\n",
+        "    output = Reshape((matrix_size, matrix_size))(dense2)\n",
+        "\n",
+        "    model = Model(inputs=[input1, input2], outputs=output)\n",
+        "    model.compile(optimizer=Adam(), loss='mse')\n",
+        "\n",
+        "    return model\n",
+        "\n",
+        "# Main code\n",
+        "matrix_size = 3  # Size of the matrices (e.g., 3x3)\n",
+        "num_samples = 10000  # Number of training samples\n",
+        "\n",
+        "(X1, X2), Y = generate_data(num_samples, matrix_size)\n",
+        "\n",
+        "# Build and train the model\n",
+        "model = build_model(matrix_size)\n",
+        "model.fit([X1, X2], Y, epochs=10, batch_size=32, validation_split=0.2)\n",
+        "\n",
+        "# Evaluate the model\n",
+        "(X_test1, X_test2), Y_test = generate_data(1000, matrix_size)\n",
+        "loss = model.evaluate([X_test1, X_test2], Y_test)\n",
+        "print(f\"Test loss: {loss}\")\n",
+        "\n",
+        "# Make predictions\n",
+        "predictions = model.predict([X_test1, X_test2])\n",
+        "\n",
+        "# Display results\n",
+        "print(\"Predictions vs Actuals:\")\n",
+        "for i in range(5):\n",
+        "    print(\"Prediction:\")\n",
+        "    print(predictions[i])\n",
+        "    print(\"Actual:\")\n",
+        "    print(Y_test[i])\n",
+        "    print()\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "D1YDFP9b_2rM",
+        "outputId": "e648ed09-520f-49a4-ea21-4083fb1160e3"
+      },
+      "execution_count": 4,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Epoch 1/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m2s\u001b[0m 4ms/step - loss: 0.5519 - val_loss: 0.1345\n",
+            "Epoch 2/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.1235 - val_loss: 0.0983\n",
+            "Epoch 3/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0909 - val_loss: 0.0750\n",
+            "Epoch 4/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0703 - val_loss: 0.0609\n",
+            "Epoch 5/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0580 - val_loss: 0.0517\n",
+            "Epoch 6/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0494 - val_loss: 0.0441\n",
+            "Epoch 7/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0420 - val_loss: 0.0365\n",
+            "Epoch 8/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m0s\u001b[0m 2ms/step - loss: 0.0341 - val_loss: 0.0300\n",
+            "Epoch 9/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0287 - val_loss: 0.0266\n",
+            "Epoch 10/10\n",
+            "\u001b[1m250/250\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m1s\u001b[0m 2ms/step - loss: 0.0256 - val_loss: 0.0244\n",
+            "\u001b[1m32/32\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m0s\u001b[0m 1ms/step - loss: 0.0240 \n",
+            "Test loss: 0.024483922868967056\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "WARNING:tensorflow:5 out of the last 37 calls to <function TensorFlowTrainer.make_predict_function.<locals>.one_step_on_data_distributed at 0x784f3dc8c160> triggered tf.function retracing. Tracing is expensive and the excessive number of tracings could be due to (1) creating @tf.function repeatedly in a loop, (2) passing tensors with different shapes, (3) passing Python objects instead of tensors. For (1), please define your @tf.function outside of the loop. For (2), @tf.function has reduce_retracing=True option that can avoid unnecessary retracing. For (3), please refer to https://www.tensorflow.org/guide/function#controlling_retracing and https://www.tensorflow.org/api_docs/python/tf/function for  more details.\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "\u001b[1m32/32\u001b[0m \u001b[32m━━━━━━━━━━━━━━━━━━━━\u001b[0m\u001b[37m\u001b[0m \u001b[1m0s\u001b[0m 3ms/step\n",
+            "Predictions vs Actuals:\n",
+            "Prediction:\n",
+            "[[ 1.4151832   0.7211462   1.2152419 ]\n",
+            " [ 1.0036534   0.3594296   0.8459073 ]\n",
+            " [ 0.56499565 -0.12157151  0.46592188]]\n",
+            "Actual:\n",
+            "[[1.50216119 0.30818652 1.23736335]\n",
+            " [1.01425658 0.19231207 0.62983553]\n",
+            " [0.40549729 0.09441431 0.33509108]]\n",
+            "\n",
+            "Prediction:\n",
+            "[[0.59580445 1.0323441  0.798602  ]\n",
+            " [0.6670469  1.1233022  0.9047206 ]\n",
+            " [0.44539905 0.8794085  0.6437918 ]]\n",
+            "Actual:\n",
+            "[[0.7137532  0.94494041 0.63132348]\n",
+            " [0.52752676 1.14373175 0.9014502 ]\n",
+            " [0.5885618  1.09267611 0.88695555]]\n",
+            "\n",
+            "Prediction:\n",
+            "[[0.85922545 0.4577396  0.30577737]\n",
+            " [1.2677333  0.72757715 0.5857759 ]\n",
+            " [0.9150971  0.455358   0.39809173]]\n",
+            "Actual:\n",
+            "[[0.76147658 0.41786596 0.38088681]\n",
+            " [1.39721467 0.55085756 0.34410198]\n",
+            " [0.7004895  0.43153116 0.49152636]]\n",
+            "\n",
+            "Prediction:\n",
+            "[[1.1391971  0.5241349  0.96301496]\n",
+            " [1.5993848  0.792943   1.2631778 ]\n",
+            " [1.1449091  0.46427163 0.8512361 ]]\n",
+            "Actual:\n",
+            "[[1.17477603 0.6050639  1.41179084]\n",
+            " [1.8338715  0.60677302 1.39539854]\n",
+            " [1.27992852 0.33067222 0.77068122]]\n",
+            "\n",
+            "Prediction:\n",
+            "[[1.1057456  1.103713   0.82171655]\n",
+            " [0.7204825  0.7510319  0.4184767 ]\n",
+            " [1.0515549  1.0888753  0.8327259 ]]\n",
+            "Actual:\n",
+            "[[1.17134765 1.10445335 0.8677471 ]\n",
+            " [0.7689577  0.67791765 0.67077916]\n",
+            " [1.09891163 1.15157429 0.67338432]]\n",
+            "\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
